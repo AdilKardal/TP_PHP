@@ -15,6 +15,7 @@ class Categorie
         $this->category_name = $category_name;
     }
 
+    #region GETTER & SETTER
     /**
      * Get the value of id
      */
@@ -84,6 +85,15 @@ class Categorie
 
         return $this;
     }
+    #endregion
+
+    public function __toString()
+    {
+        $fiche = 'ID = ' . $this->getId() . PHP_EOL;
+        $fiche .= 'ID utilisateur = ' . $this->getUserID() . PHP_EOL;
+        $fiche .= 'Nom = ' . $this->getCategory_name() . PHP_EOL;
+        return $fiche;
+    }
 
     /**
      * Sauvegarde dans la base de données ou mets à jour si déjà existant
@@ -131,23 +141,21 @@ class Categorie
      * @param string $CategoryName
      * @return boolean
      */
-    public function load(string $CategoryName): bool
+    public function load(int $idCat): bool
     {
         try {
             $user = getUser();
             $dbh = new PDO(DSN, LOGIN, PASSWORD, array(PDO::ATTR_PERSISTENT => true));
-            $statement = $dbh->prepare("select * from tableau where upper(nom_tableau) = :tableName and id_utilisateur = " . $user->getId());
-            $CategoryName = strtoupper($CategoryName);
+            $statement = $dbh->prepare("select * from tableau where id = :idCat and id_utilisateur = " . $user->getId());
 
-            if (!$statement->execute(['tableName' => $CategoryName])) {
+            if (!$statement->execute(['idCat' => $idCat])) {
                 // Si $statement->execute() == false, on affiche le code d'erreur
                 print '<p>Erreur de récupération des données : ' . $statement->errorCode() . '</p>';
             } else if ($statement->rowCount()) {
-                echo 'test';
                 $row = $statement->fetch();
                 $this->setId($row['id']);
                 $this->setUserID($row['id_utilisateur']);
-                $this->setCategory_name($row['nom_categorie']);
+                $this->setCategory_name($row['nom_tableau']);
                 $dbh = null;
                 return true;
             }
@@ -159,3 +167,11 @@ class Categorie
         }
     }
 }
+
+$_SESSION['user'] = 'akardal@treloosh.fr';
+
+$cat = new Categorie('En production');
+
+echo $cat->load(1) ? "vrai" . PHP_EOL : "faux" . PHP_EOL;
+
+echo PHP_EOL . $cat;

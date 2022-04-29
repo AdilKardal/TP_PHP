@@ -1,6 +1,5 @@
 <?php
 
-session_start();
 include_once 'connectDB.php';
 require_once 'src/core/security.php';
 
@@ -11,7 +10,7 @@ class Tableau
     private ?int $userID = null;
     private string $tableName;
 
-    public function __construct(string $tableName)
+    public function __construct(?string $tableName = null)
     {
         $this->tableName = $tableName;
     }
@@ -103,7 +102,7 @@ class Tableau
             var_dump($param);
             if ($this->getId()) {
                 $statement = $dbh->prepare('UPDATE tableau set
-                      nom_tableau = :tableName,
+                      nom_tableau = :tableName
                      where id = ' . $this->getId());
                 echo "Mis à jour effectué" . PHP_EOL;
             } else {
@@ -126,15 +125,14 @@ class Tableau
     }
 
     //Load
-    public function load(string $tableName): bool
+    public function load(int $idTable): bool
     {
         try {
             $user = getUser();
             $dbh = new PDO(DSN, LOGIN, PASSWORD, array(PDO::ATTR_PERSISTENT => true));
-            $statement = $dbh->prepare("select * from tableau where upper(nom_tableau) = :tableName and id_utilisateur = " . $user->getId());
-            $tableName = strtoupper($tableName);
+            $statement = $dbh->prepare("select * from tableau where id = :idTable and id_utilisateur = " . $user->getId());
 
-            if (!$statement->execute(['tableName' => $tableName])) {
+            if (!$statement->execute(['idTable' => $idTable])) {
                 // Si $statement->execute() == false, on affiche le code d'erreur
                 print '<p>Erreur de récupération des données : ' . $statement->errorCode() . '</p>';
             } else if ($statement->rowCount()) {
@@ -161,6 +159,8 @@ class Tableau
             $query = 'select * from tableau where id = :idTab and id_utilisateur = ' . $user->getId();
             $param['idTab'] = $idTab;
 
+            echo $idTab;
+
             $statement = $dbh->prepare($query);
 
             if (!$statement->execute($param)) {
@@ -184,22 +184,3 @@ class Tableau
 
     //Sortir un tableau avec toutes les taches
 }
-
-
-
-$_SESSION['user'] = 'akardal@treloosh.fr';
-
-$tab = new Tableau('Maquette');
-
-echo $tab->load($tab->getTableName()) ? "vrai" : "faux";
-
-echo $tab . PHP_EOL . $tab->getId() . PHP_EOL . $tab->getUserID() . PHP_EOL;
-
-echo "test = " . $tab->getId() . PHP_EOL;
-
-// $tab->save();
-echo $tab;
-
-$tab->save();
-
-echo $tab->getId();
