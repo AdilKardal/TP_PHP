@@ -167,11 +167,3 @@ class Categorie
         }
     }
 }
-
-$_SESSION['user'] = 'akardal@treloosh.fr';
-
-$cat = new Categorie('En production');
-
-echo $cat->load(1) ? "vrai" . PHP_EOL : "faux" . PHP_EOL;
-
-echo PHP_EOL . $cat;
